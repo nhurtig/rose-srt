@@ -14,11 +14,23 @@ const visitCollection = db.collection("visit");
 const quarterCollection = db.collection("quarter");
 
 var currentQuarter;
-// Find current quarter
-quarterCollection.orderBy("birthday", "desc").limit('1').get().then((snap) => {
-    currentQuarter = snap.docs[0];
-    populatePage();
-});
+
+function main() {
+    // Find current quarter
+    quarterCollection.where('owner', '==', globalUser.uid).orderBy("birthday", "desc").limit('1').get().then((snap) => {
+        if (snap.docs.length) {
+            currentQuarter = snap.docs[0];
+            populatePage();
+        } else {
+            quarterCollection.add({ name: "Default quarter", birthday: firebase.firestore.FieldValue.serverTimestamp(), owner: globalUser.uid }).then((r) => {
+                r.get().then((doc) => {
+                    currentQuarter = doc;
+                    populatePage();
+                });
+            });
+        }
+    });
+}
 
 function populatePage() {
     document.getElementById('quarterChange').placeholder = currentQuarter.data().name;
@@ -36,7 +48,7 @@ function populatePage() {
     // Populate table
     const students = new Set();
     const classes = new Set();
-    visitCollection.where('quarter', '==', db.doc('quarter/' + currentQuarter.id))
+    visitCollection.where('owner', '==', globalUser.uid).where('quarter', '==', db.doc('quarter/' + currentQuarter.id))
         .orderBy('isDone').orderBy('timeIn', 'desc').get().then((querySnapshot) => {
             querySnapshot.forEach((doc) => {
                 addVisit(doc)
@@ -57,7 +69,7 @@ function populatePage() {
 
     // Populate datalist of quarters
     quarterList.innerHTML = "";
-    quarterCollection.get().then((qS) => {
+    quarterCollection.where('owner', '==', globalUser.uid).get().then((qS) => {
         qS.forEach((doc) => {
             quarterList.innerHTML += `<option>${doc.data().name}</option>`;
         });
@@ -254,7 +266,7 @@ function submitHandler(e) {
 
     // get student's info
     const courses = new Set();
-    visitCollection.where('quarter', '==', db.doc('quarter/' + currentQuarter.id))
+    visitCollection.where('owner', '==', globalUser.uid).where('quarter', '==', db.doc('quarter/' + currentQuarter.id))
         .where('student', '==', studentName).get().then((qS) => {
             qS.forEach((doc) => {
                 data = doc.data();
@@ -281,7 +293,7 @@ function courseHandler(e) {
 
     // get course's info
     const students = new Set();
-    visitCollection.where('quarter', '==', db.doc('quarter/' + currentQuarter.id))
+    visitCollection.where('owner', '==', globalUser.uid).where('quarter', '==', db.doc('quarter/' + currentQuarter.id))
         .where('className', '==', className).get().then((qS) => {
             qS.forEach((doc) => {
                 data = doc.data();
@@ -324,12 +336,15 @@ function fixModalButtons() {
 modalForm.addEventListener('submit', addVisitFormSubmit);
 
 function addVisitFormSubmit(e) {
+    console.log("HI");
     visitCollection.add({
         isDone: false, prof: modalForm.modalProf.value,
         className: modalForm.modalClass.value, reason: modalForm.modalReason.value,
         student: modalForm.modalName.value, timeIn: firebase.firestore.FieldValue.serverTimestamp(),
-        quarter: quarterCollection.doc(currentQuarter.id)
+        quarter: quarterCollection.doc(currentQuarter.id),
+        owner: globalUser.uid
     }).then((doc) => {
+        console.log("ADDED");
         doc.get().then((doc) => {
             addVisit(doc, true);
         });
@@ -340,12 +355,12 @@ function changeQuarter(e) {
     e.preventDefault();
     const myName = changeQuarterForm.name.value;
     changeQuarterForm.reset();
-    quarterCollection.where('name', '==', myName).limit(1).get().then((snap) => {
+    quarterCollection.where('owner', '==', globalUser.uid).where('name', '==', myName).limit(1).get().then((snap) => {
         if (snap.docs.length) {
             currentQuarter = snap.docs[0];
             populatePage();
         } else {
-            quarterCollection.add({ name: myName, birthday: firebase.firestore.FieldValue.serverTimestamp() }).then((r) => {
+            quarterCollection.add({ name: myName, birthday: firebase.firestore.FieldValue.serverTimestamp(), owner: globalUser.uid }).then((r) => {
                 r.get().then((doc) => {
                     currentQuarter = doc;
                     populatePage();
