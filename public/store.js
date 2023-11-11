@@ -1,8 +1,10 @@
 const visits = document.querySelector("#visits");
 const studentList = document.getElementById('students');
+const courseList = document.getElementById('courses');
 const addVisitModal = document.getElementById('addVisit');
 const modalForm = document.getElementById("modalForm");
 const modalInfo = document.getElementById("modalInfo");
+const modalCancel = document.getElementById("modalCancel");
 
 const db = firebase.firestore();
 
@@ -29,22 +31,29 @@ function populatePage() {
 `
     // Populate table
     const students = new Set();
+    const classes = new Set();
     visitCollection.where('quarter', '==', db.doc('quarter/' + currentQuarter.id))
         .orderBy('isDone').orderBy('timeIn', 'desc').get().then((querySnapshot) => {
             querySnapshot.forEach((doc) => {
+                console.log(doc.data());
                 addVisit(doc)
                 students.add(doc.data().student);
+                classes.add(doc.data().className);
             });
             // Populate datalist of students
             studentList.innerHTML = "";
             for (const student of students.keys()) {
                 studentList.innerHTML += `<option>${student}</option>`;
             }
+            // Populate datalist of courses
+            courseList.innerHTML = "";
+            for (const course of classes.keys()) {
+                courseList.innerHTML += `<option>${course}</option>`;
+            }
         });
 }
 
 function makeData(str) {
-    console.log(str);
     return "<td>" + str + "</td>";
 }
 
@@ -89,12 +98,16 @@ function fillRow(row, data, doc) {
     }
 }
 
-function addVisit(doc) {
+function addVisit(doc, top=false) {
     const data = doc.data();
     const row = document.createElement("tr");
     row.id = doc.id;
     fillRow(row, data, doc)
-    visits.appendChild(row);
+    if (top && visits.children.length >= 2) {
+        visits.insertBefore(row, visits.children[1]);
+    } else {
+        visits.appendChild(row);
+    }
 }
 
 const addStudentForm = document.getElementById("addStudent")
@@ -108,6 +121,7 @@ function submitHandler(e) {
     modalForm.reset();
     const studentName = addStudentForm.name.value;
     modalForm.name.value = studentName;
+    modalInfo.innerHTML = '<button style="visibility: hidden;">autofill</button>';
     addVisitModal.showModal();
     modalForm.class.focus();
     addStudentForm.reset();
@@ -118,12 +132,14 @@ function submitHandler(e) {
         .where('student', '==', studentName).get().then((qS) => {
             qS.forEach((doc) => {
                 data = doc.data();
-                courses.add([data.className, data.prof]);
+                courses.add(data.className + ';' + data.prof);
             });
-            modalInfo.innerHTML = "";
-            for (const course of courses.keys()) {
+            modalInfo.innerHTML = '';
+            for (const courseStr of courses.keys()) {
+                const course = courseStr.split(';');
                 modalInfo.innerHTML += `<button onclick="modalCourse('${course[0]}', '${course[1]}')">${course[0]}/${course[1]}</button>`
             }
+            fixModalButtons();
         });
 }
 
@@ -132,6 +148,7 @@ function courseHandler(e) {
     modalForm.reset();
     const className = addCourseForm.name.value;
     modalForm.class.value = className;
+    modalInfo.innerHTML = '<button style="visibility: hidden;">autofill</button>';
     addVisitModal.showModal();
     modalForm.name.focus();
     addCourseForm.reset();
@@ -142,12 +159,14 @@ function courseHandler(e) {
         .where('className', '==', className).get().then((qS) => {
             qS.forEach((doc) => {
                 data = doc.data();
-                students.add([data.student, data.prof]);
+                students.add(data.student + ';' + data.prof);
             });
-            modalInfo.innerHTML = "";
-            for (const course of students.keys()) {
+            modalInfo.innerHTML = '';
+            for (const courseStr of students.keys()) {
+                course = courseStr.split(';');
                 modalInfo.innerHTML += `<button onclick="modalStudent('${course[0]}', '${course[1]}')">${course[0]}/${course[1]}</button>`
             }
+            fixModalButtons();
         });
 }
 
@@ -161,4 +180,29 @@ function modalStudent(student, prof) {
     modalForm.reason.focus();
     modalForm.name.value = student;
     modalForm.prof.value = prof;
+}
+
+function fixModalButtons() {
+    modalForm.querySelectorAll("button").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+        e.preventDefault();
+    });});
+    modalCancel.addEventListener("click", (e) => {
+        e.preventDefault();
+        addVisitModal.close();
+    });
+}
+
+modalForm.addEventListener('submit', addVisitFormSubmit);
+
+function addVisitFormSubmit(e) {
+    visitCollection.add({isDone: false, prof: modalForm.modalProf.value,
+        className: modalForm.modalClass.value, reason: modalForm.modalReason.value,
+        student: modalForm.modalName.value, timeIn: firebase.firestore.FieldValue.serverTimestamp(),
+    quarter: quarterCollection.doc(currentQuarter.id)}).then((doc) => {
+        doc.get().then((doc) => {
+            console.log(doc);
+            addVisit(doc, true);
+        });
+    });
 }

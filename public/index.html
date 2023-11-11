@@ -30,20 +30,20 @@
   <dialog id="addVisit">
     <form id="modalForm" method="dialog">
       <div><input type="text" required name="name" id="modalName" autocomplete="off" list="students" placeholder="name">
-        <input type="text" required name="class" id="modalClass" autocomplete="off" list="studentClasses"
-          placeholder="class">
+        <input type="text" required name="class" id="modalClass" autocomplete="off" list="courses"
+          placeholder="course name">
         <input type="text" required name="prof" id="modalProf" autocomplete="off" placeholder="prof">
         <input type="text" required name="reason" id="modalReason" placeholder="reason">
       </div>
       <div id="modalInfo"><button style="visibility: hidden;">autofill</button></div>
-      <div><button>Cancel</button><input type="submit" value="Add"></div>
+      <div><button id="modalCancel">Cancel</button><input type="submit" value="Add"></div>
     </form>
   </dialog>
   <div>
     <form id="addStudent"><input required type="text" placeholder="name" name="name" autocomplete="off" list="students">
       <datalist id="students"></datalist><input type="submit" value="Add student">
     </form>
-    <form id="addCourse"><input required type="text" placeholder="name" name="name" autocomplete="off" list="courses">
+    <form id="addCourse"><input required type="text" placeholder="course name" name="name" autocomplete="off" list="courses">
       <datalist id="courses"></datalist><input type="submit" value="Add course">
     </form>
   </div>
