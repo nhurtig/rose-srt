@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Welcome to Firebase Hosting</title>
-
+  <link rel="stylesheet" type="text/css" href="style.css">
   <!-- update the version number as needed -->
   <script defer src="/__/firebase/10.6.0/firebase-app-compat.js"></script>
   <!-- include only the Firebase features as you need -->
@@ -39,6 +39,11 @@
       <div><button type="button" id="modalCancel">Cancel</button><input type="submit" value="Add"></div>
     </form>
   </dialog>
+  <dialog id="confirmModal">
+    <div id="confirmText"></div>
+    <button type="button" onclick="confirmF(false)">Cancel</button>
+    <button type="button" onclick="confirmF(true)">Yes</button>
+  </dialog>
   <div>
     <form id="addStudent"><input required type="text" placeholder="name" name="name" autocomplete="off" list="students">
       <datalist id="students"></datalist><input type="submit" value="Add student">
@@ -49,8 +54,12 @@
     </form>
     <form id="changeQuarter"><input required id="quarterChange" type="text" placeholder="" name="name"
         autocomplete="off" list="quarters">
-      <datalist id="quarters"></datalist><input type="submit" value="Change quarter"></form>
-      <button type="button" onclick="deleteQuarter()">Delete current quarter</button>
+      <datalist id="quarters"></datalist><input type="submit" value="Change quarter">
+    </form>
+    <button type="button" onclick="deleteQuarter()">Delete current quarter</button>
+    <button type="button" onclick="logOut()">Log out</button>
+    <button type="button" onclick="exportWeek()">Download last week's visits</button>
+    <button type="button" onclick="exportAll()">Download all visits</button>
   </div>
   <table>
     <tbody id="visits">

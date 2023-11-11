@@ -213,9 +213,13 @@ function makeEditable(row, id) {
 }
 
 function deleteVisit(id) {
-    visitCollection.doc(id).delete().then((doc) => {
-        document.getElementById(id).remove();
-    });
+    confirm((bool) => {
+        if (bool) {
+            visitCollection.doc(id).delete().then((doc) => {
+                document.getElementById(id).remove();
+            });
+        }
+    }, "Are you sure you want to delete this visit?");
 }
 
 function fillRow(row, data, doc) {
@@ -371,6 +375,172 @@ function changeQuarter(e) {
 }
 
 function deleteQuarter(e) {
-    quarterCollection.doc(currentQuarter.id).delete().then(() => {
-        main();});
+    confirm((bool) => {
+        if (bool) {
+            quarterCollection.doc(currentQuarter.id).delete().then(() => {
+                main();
+            });
+        }
+    }, "Are you sure you want to delete " + currentQuarter.data().name + "?");
+}
+
+function logOut(e) {
+    firebase.auth().signOut();
+}
+
+var confirmed = false;
+var confirmF = null;
+function confirm(f, prompt) {
+    confirmed = false;
+    document.getElementById("confirmText").innerHTML = prompt;
+    confirmF = (bool) => { confirmModal.close(); f(bool); };
+    confirmModal.showModal();
+}
+
+function getMostRecentSundayMidnight() {
+    const currentDate = new Date();
+    const currentDayOfWeek = currentDate.getDay();
+    const daysToSubtract = (currentDayOfWeek) % 7; // Calculate days to subtract to reach the most recent Saturday
+
+    // Subtract days to get the timestamp for the most recent Saturday midnight
+    currentDate.setDate(currentDate.getDate() - daysToSubtract);
+    currentDate.setHours(0, 0, 0, 0); // Set the time to midnight
+
+    return currentDate;
+}
+
+function formatDateToMMDD(date) {
+    const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Month is zero-based, so we add 1
+    const day = date.getDate().toString().padStart(2, '0');
+
+    return `${month}/${day}`;
+}
+
+function exportWeek(e) {
+    const visits = [];
+    const endTime = getMostRecentSundayMidnight();
+    const startTime = new Date();
+    startTime.setDate(endTime.getDate() - 7);
+    startTime.setHours(0,0,0,0);
+    const endTimePretty = new Date();
+    endTimePretty.setDate(endTime.getDate() - 1);
+    endTimePretty.setHours(0,0,0,0);
+
+    console.log(startTime);
+    console.log(endTime);
+
+    visits.push(["Student, Course, Professor, Problem Description, Time In, Time Out", "Total Time"]);
+    visitCollection.where('owner', '==', globalUser.uid).where('timeIn', '>', startTime).where('timeIn', '<', endTime).get().then((qS) => {
+        qS.forEach((doc) => {
+            data = doc.data();
+            let timeOut;
+            let totalTime;
+            if (data.isDone) {
+                timeOut = data.timeOut;
+                totalTime = timeOut - data.timeIn;
+            } else {
+                timeOut = "undefined";
+                totalTime = "undefined";
+            }
+            visits.push([
+                data.student,
+                data.className,
+                data.prof,
+                data.reason,
+                convertTimestampToHumanReadable(data.timeIn),
+                convertTimestampToHumanReadable(timeOut),
+                secondsToHHMM(totalTime)
+            ]);
+        });
+        download2Darray(`visits_${formatDateToMMDD(startTime)}-${formatDateToMMDD(endTimePretty)}`, visits);
+    });
+}
+
+function exportAll(e) {
+    const quarterNames = new Map();
+    const visits = [];
+    visits.push(["Quarter, Student, Course, Professor, Problem Description, Time In, Time Out", "Total Time"]);
+    quarterCollection.where('owner', '==', globalUser.uid).get().then((qS) => {
+        qS.forEach((doc) => {
+            data = doc.data();
+            quarterNames[doc.id] = data.name;
+        });
+        visitCollection.where('owner', '==', globalUser.uid).get().then((qS) => {
+            qS.forEach((doc) => {
+                data = doc.data();
+                let quarterName;
+                if (quarterNames.has(data.quarter)) {
+                    quarterName = quarterNames.get(data.quarter);
+                } else {
+                    quarterName = "undefined";
+                }
+                let timeOut;
+                let totalTime;
+                if (data.isDone) {
+                    timeOut = data.timeOut;
+                    totalTime = timeOut - data.timeIn;
+                } else {
+                    timeOut = "undefined";
+                    totalTime = "undefined";
+                }
+                visits.push([
+                    quarterName,
+                    data.student,
+                    data.className,
+                    data.prof,
+                    data.reason,
+                    convertTimestampToHumanReadable(data.timeIn),
+                    convertTimestampToHumanReadable(timeOut),
+                    secondsToHHMM(totalTime)
+                ]);
+            });
+            download2Darray("all_visits", visits);
+        });
+    });
+}
+
+function convertTimestampToHumanReadable(ts) {
+    if (ts == "undefined") {
+        return ts
+    }
+    const milliseconds = ts.seconds * 1000 + ts.nanoseconds / 1e6;
+    const date = new Date(milliseconds);
+
+    // You can format the date as you like
+    const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+    return date.toLocaleString('en-US', options);
+}
+
+function secondsToHHMM(seconds) {
+    if (seconds == "undefined") {
+        return seconds;
+    }
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+
+    const HH = hours < 10 ? '0' + hours : hours;
+    const MM = minutes < 10 ? '0' + minutes : minutes;
+
+    return `${HH}:${MM}`;
+}
+
+function download2Darray(fname, array) {
+    // Convert the 2D array to a CSV string with values wrapped in double quotes
+    const csvContent = array.map(row =>
+        row.map(value => `"${value}"`).join(',')
+    ).join('\n');
+
+    // Create a data URI for the CSV content
+    const dataUri = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent);
+
+    // Create an anchor element to trigger the download
+    const anchor = document.createElement('a');
+    anchor.setAttribute('href', dataUri);
+    anchor.setAttribute('download', fname + '.csv');
+
+    // Simulate a click event to trigger the download
+    anchor.style.display = 'none';
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
 }

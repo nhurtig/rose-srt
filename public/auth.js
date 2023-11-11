@@ -4,9 +4,10 @@ var globalUser;
 firebase.auth().onAuthStateChanged(function(user) {
     if (user) {
         globalUser = user;
-        console.log(user);
+        // console.log(user);
         main();
     } else {
-        firebase.auth().signInWithRedirect(provider);
+        // console.log("user not signed in");
+        firebase.auth().signInWithPopup(provider);
     }
   });
