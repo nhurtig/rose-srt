@@ -1,10 +1,12 @@
 const visits = document.querySelector("#visits");
+const studentList = document.getElementById('students');
 
 const db = firebase.firestore();
 
 // Reference to the "visit" collection
 const visitCollection = db.collection("visit");
 const quarterCollection = db.collection("quarter");
+const studentCollection = db.collection("student");
 
 var currentQuarter;
 // Find current quarter
@@ -14,13 +16,31 @@ quarterCollection.orderBy("birthday", "desc").limit('1').get().then((snap) => {
 });
 
 function populatePage() {
-    // Populate page
+    visits.innerHTML = `      <tr>
+        <th>Name</th>
+        <th>Course</th>
+        <th>Professor</th>
+        <th>Reason</th>
+        <th>Time in</th>
+        <th>Time out</th>
+      </tr>
+`
+    // Populate table
     visitCollection.where('quarter', '==', db.doc('quarter/' + currentQuarter.id))
         .orderBy('isDone').orderBy('timeIn', 'desc').get().then((querySnapshot) => {
             querySnapshot.forEach((doc) => {
                 addVisit(doc)
             });
         });
+
+    // Populate datalist of students
+
+    studentList.innerHTML = "";
+    studentCollection.get().then((qS) => {
+        qS.forEach((doc) => {
+            studentList.innerHTML += `<option>${doc.data().name}</option>`;
+        });
+    });
 }
 
 function makeData(str) {
@@ -77,4 +97,14 @@ function addVisit(doc) {
     row.id = doc.id;
     fillRow(row, data, doc)
     visits.appendChild(row);
+}
+
+const addStudentForm = document.getElementById("addStudent")
+
+addStudentForm.addEventListener('submit', submitHandler);
+
+function submitHandler(e) {
+    e.preventDefault();
+    console.log(addStudentForm.name.value);
+    addStudentForm.reset();
 }

@@ -27,7 +27,11 @@
 </head>
 
 <body>
-  <div>hi!</div>
+  <div>
+    <form id="addStudent"><input type="text" placeholder="name" name="name" autocomplete="off" list="students">
+      <datalist id="students"></datalist><input type="submit" value="Add">
+    </form>
+  </div>
   <table>
     <tbody id="visits">
       <tr>
