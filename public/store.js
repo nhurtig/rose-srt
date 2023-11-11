@@ -369,3 +369,8 @@ function changeQuarter(e) {
         }
     });
 }
+
+function deleteQuarter(e) {
+    quarterCollection.doc(currentQuarter.id).delete().then(() => {
+        main();});
+}
