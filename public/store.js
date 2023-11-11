@@ -2,6 +2,7 @@ const visits = document.querySelector("#visits");
 const studentList = document.getElementById('students');
 const addVisitModal = document.getElementById('addVisit');
 const modalForm = document.getElementById("modalForm");
+const modalInfo = document.getElementById("modalInfo");
 
 const db = firebase.firestore();
 
@@ -102,14 +103,72 @@ function addVisit(doc) {
 }
 
 const addStudentForm = document.getElementById("addStudent")
+const addCourseForm = document.getElementById("addCourse");
 
 addStudentForm.addEventListener('submit', submitHandler);
+addCourseForm.addEventListener('submit', courseHandler);
 
 function submitHandler(e) {
     e.preventDefault();
     modalForm.reset();
-    modalForm.name.value = addStudentForm.name.value;
+    const studentName = addStudentForm.name.value;
+    modalForm.name.value = studentName;
     addVisitModal.showModal();
     modalForm.class.focus();
     addStudentForm.reset();
+
+    // get student's info
+    const courses = new Set();
+    studentCollection.where('name', '==', studentName).get().then((qS) => {
+        qS.forEach((doc) => {
+            sid = doc.id;
+            visitCollection.where('quarter', '==', db.doc('quarter/' + currentQuarter.id))
+                .where('student', '==', db.doc('student/' + sid)).get().then((qS) => {
+                    qS.forEach((doc) => {
+                        data = doc.data();
+                        courses.add([data.className, data.prof]);
+                    });
+                    modalInfo.innerHTML = "";
+                    for (const course of courses.keys()) {
+                        modalInfo.innerHTML += `<button onclick="modalCourse('${course[0]}', '${course[1]}')">${course[0]}/${course[1]}</button>`
+                    }
+                });
+        });
+    });
+}
+
+function courseHandler(e) {
+    e.preventDefault();
+    modalForm.reset();
+    const className = addCourseForm.name.value;
+    modalForm.class.value = className;
+    addVisitModal.showModal();
+    modalForm.name.focus();
+    addCourseForm.reset();
+
+    // get course's info
+    const students = new Set();
+    visitCollection.where('quarter', '==', db.doc('quarter/' + currentQuarter.id))
+        .where('className', '==', className).get().then((qS) => {
+            qS.forEach((doc) => {
+                data = doc.data();
+                students.add([data.student.id, data.prof]);
+            });
+            modalInfo.innerHTML = "";
+            for (const course of students.keys()) {
+                modalInfo.innerHTML += `<button onclick="modalStudent('${course[0]}', '${course[1]}')">${course[0]}/${course[1]}</button>`
+            }
+        });
+}
+
+function modalCourse(cname, prof) {
+    modalForm.reason.focus();
+    modalForm.class.value = cname;
+    modalForm.prof.value = prof;
+}
+
+function modalStudent(sid, prof) {
+    modalForm.reason.focus();
+    modalForm.name.value = 'FILLER';
+    modalForm.prof.value = prof;
 }
