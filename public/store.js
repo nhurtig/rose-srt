@@ -5,6 +5,7 @@ const addVisitModal = document.getElementById('addVisit');
 const modalForm = document.getElementById("modalForm");
 const modalInfo = document.getElementById("modalInfo");
 const modalCancel = document.getElementById("modalCancel");
+const quarterList = document.getElementById("quarters");
 
 const db = firebase.firestore();
 
@@ -20,6 +21,7 @@ quarterCollection.orderBy("birthday", "desc").limit('1').get().then((snap) => {
 });
 
 function populatePage() {
+    document.getElementById('quarterChange').placeholder = currentQuarter.data().name;
     visits.innerHTML = `      <tr>
         <th>Name</th>
         <th>Course</th>
@@ -52,6 +54,14 @@ function populatePage() {
                 courseList.innerHTML += `<option>${course}</option>`;
             }
         });
+
+    // Populate datalist of quarters
+    quarterList.innerHTML = "";
+    quarterCollection.get().then((qS) => {
+        qS.forEach((doc) => {
+            quarterList.innerHTML += `<option>${doc.data().name}</option>`;
+        });
+    });
 }
 
 function makeData(str) {
@@ -67,7 +77,7 @@ function printTimestamp(ts) {
     str += date.getMonth() + 1;
     mins = date.getMinutes();
     mins = ("0" + mins).slice(-2);
-    str += "/" + (date.getDay()+1) + "/" + (date.getYear() - 100) + " " + date.getHours() + ":" + mins;
+    str += "/" + (date.getDay() + 1) + "/" + (date.getYear() - 100) + " " + date.getHours() + ":" + mins;
     return str;
 }
 
@@ -173,7 +183,7 @@ function makeEditable(row, id) {
     markCurrent.type = "button";
     markCurrent.textContent = 'Mark as ongoing';
     markCurrent.onclick = (e) => {
-        document.getElementById('timeOut'+id).value = null;
+        document.getElementById('timeOut' + id).value = null;
     };
     data.appendChild(markCurrent);
     const cancel = document.createElement("button");
@@ -226,9 +236,11 @@ function addVisit(doc, top = false) {
 
 const addStudentForm = document.getElementById("addStudent")
 const addCourseForm = document.getElementById("addCourse");
+const changeQuarterForm = document.getElementById("changeQuarter");
 
 addStudentForm.addEventListener('submit', submitHandler);
 addCourseForm.addEventListener('submit', courseHandler);
+changeQuarterForm.addEventListener('submit', changeQuarter);
 
 function submitHandler(e) {
     e.preventDefault();
@@ -321,5 +333,24 @@ function addVisitFormSubmit(e) {
         doc.get().then((doc) => {
             addVisit(doc, true);
         });
+    });
+}
+
+function changeQuarter(e) {
+    e.preventDefault();
+    const myName = changeQuarterForm.name.value;
+    changeQuarterForm.reset();
+    quarterCollection.where('name', '==', myName).limit(1).get().then((snap) => {
+        if (snap.docs.length) {
+            currentQuarter = snap.docs[0];
+            populatePage();
+        } else {
+            quarterCollection.add({ name: myName, birthday: firebase.firestore.FieldValue.serverTimestamp() }).then((r) => {
+                r.get().then((doc) => {
+                    currentQuarter = doc;
+                    populatePage();
+                });
+            });
+        }
     });
 }
