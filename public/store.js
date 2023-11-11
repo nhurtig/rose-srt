@@ -33,7 +33,7 @@ function main() {
 }
 
 function populatePage() {
-    document.getElementById('quarterChange').placeholder = currentQuarter.data().name;
+    document.getElementById('quarterLabel').textContent = "Current quarter: " + currentQuarter.data().name;
     visits.innerHTML = `      <tr>
         <th>Name</th>
         <th>Course</th>
@@ -381,7 +381,7 @@ function deleteQuarter(e) {
                 main();
             });
         }
-    }, "Are you sure you want to delete " + currentQuarter.data().name + "?");
+    }, "Are you sure you want to delete \"" + currentQuarter.data().name + "\"?");
 }
 
 function logOut(e) {

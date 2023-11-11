@@ -42,41 +42,64 @@
   <dialog id="confirmModal">
     <div id="confirmText"></div>
     <button type="button" onclick="confirmF(false)">Cancel</button>
-    <button type="button" onclick="confirmF(true)">Yes</button>
+    <button type="button" onclick="confirmF(true)" style="float: right">Yes</button>
   </dialog>
-  <div>
-    <form id="addStudent"><input required type="text" placeholder="name" name="name" autocomplete="off" list="students">
-      <datalist id="students"></datalist><input type="submit" value="Add student">
-    </form>
-    <form id="addCourse"><input required type="text" placeholder="course name" name="name" autocomplete="off"
-        list="courses">
-      <datalist id="courses"></datalist><input type="submit" value="Add course">
-    </form>
-    <form id="changeQuarter"><input required id="quarterChange" type="text" placeholder="" name="name"
-        autocomplete="off" list="quarters">
-      <datalist id="quarters"></datalist><input type="submit" value="Change quarter">
-    </form>
-    <button type="button" onclick="deleteQuarter()">Delete current quarter</button>
-    <button type="button" onclick="logOut()">Log out</button>
-    <button type="button" onclick="exportWeek()">Download last week's visits</button>
-    <button type="button" onclick="exportAll()">Download all visits</button>
-  </div>
-  <table>
-    <tbody id="visits">
-      <tr>
-        <th>Name</th>
-        <th>Course</th>
-        <th>Professor</th>
-        <th>Reason</th>
-        <th>Time in</th>
-        <th>Time out</th>
-        <th></th>
-        <th></th>
-      </tr>
-    </tbody>
-  </table>
-  <script defer src="auth.js"></script>
-  <script defer src="store.js"></script>
+
+  <div class="containervert">
+    <div class="row-container">
+      <div class="left-column">
+        <form id="addStudent">
+          <input required type="text" placeholder="name" name="name" autocomplete="off" list="students">
+          <datalist id="students"></datalist>
+          <input type="submit" value="Add student">
+        </form>
+
+        <form id="addCourse">
+          <input required type="text" placeholder="course name" name="name" autocomplete="off" list="courses">
+          <datalist id="courses"></datalist>
+          <input type="submit" value="Add course">
+        </form>
+      </div>
+
+      <div class="right-column">
+
+        <div class="containervert push-right">
+          <div class="top-row">
+            <form id="changeQuarter">
+              <label for="name" id="quarterLabel"></label>
+              <input required id="quarterChange" type="text" placeholder="New quarter here" name="name" autocomplete="off"
+                list="quarters">
+              <datalist id="quarters"></datalist>
+              <input type="submit" value="Change quarter">
+            </form>
+            <button type="button" onclick="deleteQuarter()">Delete current quarter</button>
+          </div>
+          <div class="bottom-row">
+            <button type="button" onclick="exportWeek()">Download last week's visits</button>
+            <button type="button" onclick="exportAll()">Download all visits</button>
+            <button type="button" onclick="logOut()">Log out</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <table>
+      <tbody id="visits">
+        <tr>
+          <th>Name</th>
+          <th>Course</th>
+          <th>Professor</th>
+          <th>Reason</th>
+          <th>Time in</th>
+          <th>Time out</th>
+          <th></th>
+          <th></th>
+        </tr>
+      </tbody>
+    </table>
+    <script defer src="auth.js"></script>
+    <script defer src="store.js"></script>
 </body>
 
 </html>
