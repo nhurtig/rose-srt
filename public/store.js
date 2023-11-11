@@ -1,5 +1,7 @@
 const visits = document.querySelector("#visits");
 const studentList = document.getElementById('students');
+const addVisitModal = document.getElementById('addVisit');
+const modalForm = document.getElementById("modalForm");
 
 const db = firebase.firestore();
 
@@ -105,6 +107,9 @@ addStudentForm.addEventListener('submit', submitHandler);
 
 function submitHandler(e) {
     e.preventDefault();
-    console.log(addStudentForm.name.value);
+    modalForm.reset();
+    modalForm.name.value = addStudentForm.name.value;
+    addVisitModal.showModal();
+    modalForm.class.focus();
     addStudentForm.reset();
 }

@@ -27,6 +27,17 @@
 </head>
 
 <body>
+  <dialog id="addVisit">
+    <form id="modalForm" method="dialog">
+      <div><input type="text" name="name" id="modalName" autocomplete="off" list="students" placeholder="name">
+        <input type="text" name="class" id="modalClass" autocomplete="off" list="studentClasses" placeholder="class">
+        <input type="text" name="prof" id="modalProf" autocomplete="off" placeholder="prof">
+        <input type="text" name="reason" id="modalReason" placeholder="reason">
+      </div>
+      <div><button>close</button>
+      </div>
+    </form>
+  </dialog>
   <div>
     <form id="addStudent"><input type="text" placeholder="name" name="name" autocomplete="off" list="students">
       <datalist id="students"></datalist><input type="submit" value="Add">
