@@ -9,7 +9,6 @@ const db = firebase.firestore();
 // Reference to the "visit" collection
 const visitCollection = db.collection("visit");
 const quarterCollection = db.collection("quarter");
-const studentCollection = db.collection("student");
 
 var currentQuarter;
 // Find current quarter
@@ -29,21 +28,19 @@ function populatePage() {
       </tr>
 `
     // Populate table
+    const students = new Set();
     visitCollection.where('quarter', '==', db.doc('quarter/' + currentQuarter.id))
         .orderBy('isDone').orderBy('timeIn', 'desc').get().then((querySnapshot) => {
             querySnapshot.forEach((doc) => {
                 addVisit(doc)
+                students.add(doc.data().student);
             });
+            // Populate datalist of students
+            studentList.innerHTML = "";
+            for (const student of students.keys()) {
+                studentList.innerHTML += `<option>${student}</option>`;
+            }
         });
-
-    // Populate datalist of students
-
-    studentList.innerHTML = "";
-    studentCollection.get().then((qS) => {
-        qS.forEach((doc) => {
-            studentList.innerHTML += `<option>${doc.data().name}</option>`;
-        });
-    });
 }
 
 function makeData(str) {
@@ -80,18 +77,16 @@ function checkOut(id) {
 
 function fillRow(row, data, doc) {
     row.innerHTML = "";
-    data.student.get().then((stDoc) => {
-        row.innerHTML += makeData(stDoc.data().name);
-        row.innerHTML += makeData(data.className);
-        row.innerHTML += makeData(data.prof);
-        row.innerHTML += makeData(data.reason);
-        row.innerHTML += makeData(printTimestamp(data.timeIn));
-        if (data.isDone) {
-            row.innerHTML += makeData(printTimestamp(data.timeOut));
-        } else {
-            row.innerHTML += makeData(checkOutButton(doc.id));
-        }
-    });
+    row.innerHTML += makeData(data.student);
+    row.innerHTML += makeData(data.className);
+    row.innerHTML += makeData(data.prof);
+    row.innerHTML += makeData(data.reason);
+    row.innerHTML += makeData(printTimestamp(data.timeIn));
+    if (data.isDone) {
+        row.innerHTML += makeData(printTimestamp(data.timeOut));
+    } else {
+        row.innerHTML += makeData(checkOutButton(doc.id));
+    }
 }
 
 function addVisit(doc) {
@@ -119,22 +114,17 @@ function submitHandler(e) {
 
     // get student's info
     const courses = new Set();
-    studentCollection.where('name', '==', studentName).get().then((qS) => {
-        qS.forEach((doc) => {
-            sid = doc.id;
-            visitCollection.where('quarter', '==', db.doc('quarter/' + currentQuarter.id))
-                .where('student', '==', db.doc('student/' + sid)).get().then((qS) => {
-                    qS.forEach((doc) => {
-                        data = doc.data();
-                        courses.add([data.className, data.prof]);
-                    });
-                    modalInfo.innerHTML = "";
-                    for (const course of courses.keys()) {
-                        modalInfo.innerHTML += `<button onclick="modalCourse('${course[0]}', '${course[1]}')">${course[0]}/${course[1]}</button>`
-                    }
-                });
+    visitCollection.where('quarter', '==', db.doc('quarter/' + currentQuarter.id))
+        .where('student', '==', studentName).get().then((qS) => {
+            qS.forEach((doc) => {
+                data = doc.data();
+                courses.add([data.className, data.prof]);
+            });
+            modalInfo.innerHTML = "";
+            for (const course of courses.keys()) {
+                modalInfo.innerHTML += `<button onclick="modalCourse('${course[0]}', '${course[1]}')">${course[0]}/${course[1]}</button>`
+            }
         });
-    });
 }
 
 function courseHandler(e) {
@@ -152,7 +142,7 @@ function courseHandler(e) {
         .where('className', '==', className).get().then((qS) => {
             qS.forEach((doc) => {
                 data = doc.data();
-                students.add([data.student.id, data.prof]);
+                students.add([data.student, data.prof]);
             });
             modalInfo.innerHTML = "";
             for (const course of students.keys()) {
@@ -167,8 +157,8 @@ function modalCourse(cname, prof) {
     modalForm.prof.value = prof;
 }
 
-function modalStudent(sid, prof) {
+function modalStudent(student, prof) {
     modalForm.reason.focus();
-    modalForm.name.value = 'FILLER';
+    modalForm.name.value = student;
     modalForm.prof.value = prof;
 }
