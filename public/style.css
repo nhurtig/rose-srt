@@ -1,3 +1,29 @@
+/* Apply rounded corners to buttons */
+button {
+    border-radius: 5px;
+    /* Adjust the radius as needed */
+}
+
+/* Apply rounded corners to input fields and datalists */
+input,
+datalist {
+    border-radius: 5px;
+    /* Adjust the radius as needed */
+}
+
+/* Apply rounded corners to the dialog */
+dialog {
+    border-radius: 10px;
+    /* Adjust the radius as needed */
+}
+
+/* Apply rounded corners to the top and bottom rows in the container */
+.top-row,
+.bottom-row {
+    border-radius: 5px;
+    /* Adjust the radius as needed */
+}
+
 .container {
     display: flex;
 }
