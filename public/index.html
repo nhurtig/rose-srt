@@ -19,9 +19,9 @@
   <script defer src="/__/firebase/10.6.0/firebase-remote-config-compat.js"></script>
   <script defer src="/__/firebase/10.6.0/firebase-performance-compat.js"></script>
   <!-- 
-      initialize the SDK after all desired features are loaded, set useEmulator to false
-      to avoid connecting the SDK to running emulators.
-    -->
+    initialize the SDK after all desired features are loaded, set useEmulator to false
+    to avoid connecting the SDK to running emulators.
+  -->
   <script defer src="/__/firebase/init.js?useEmulator=true"></script>
 
 </head>
@@ -49,26 +49,28 @@
     <div class="row-container">
       <div class="left-column">
         <form id="addStudent">
-          <input required type="text" placeholder="name" name="name" autocomplete="off" list="students">
+          <label for="sName">Student name</label>
+          <input required id="sName" type="text" placeholder="name" name="name" autocomplete="off" list="students">
           <datalist id="students"></datalist>
-          <input type="submit" value="Add student">
+          <input type="submit" value="Student visit">
         </form>
 
         <form id="addCourse">
-          <input required type="text" placeholder="course name" name="name" autocomplete="off" list="courses">
+          <label for="cName">Course name</label>
+          <input required type="text" id="cName" placeholder="course name" name="name" autocomplete="off"
+            list="courses">
           <datalist id="courses"></datalist>
-          <input type="submit" value="Add course">
+          <input type="submit" value="Visit by course">
         </form>
       </div>
 
       <div class="right-column">
-
         <div class="containervert push-right">
           <div class="top-row">
             <form id="changeQuarter">
-              <label for="name" id="quarterLabel"></label>
-              <input required id="quarterChange" type="text" placeholder="New quarter here" name="name" autocomplete="off"
-                list="quarters">
+              <label for="quarterChange" id="quarterLabel"></label>
+              <input required id="quarterChange" type="text" placeholder="New quarter here" name="name"
+                autocomplete="off" list="quarters">
               <datalist id="quarters"></datalist>
               <input type="submit" value="Change quarter">
             </form>
@@ -93,8 +95,6 @@
           <th>Reason</th>
           <th>Time in</th>
           <th>Time out</th>
-          <th></th>
-          <th></th>
         </tr>
       </tbody>
     </table>

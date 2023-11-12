@@ -41,8 +41,6 @@ function populatePage() {
         <th>Reason</th>
         <th>Time in</th>
         <th>Time out</th>
-        <th></th>
-        <th></th>
       </tr>
 `
     // Populate table
@@ -84,12 +82,15 @@ function printTimestamp(ts) {
     if (!ts) {
         return "NULL";
     }
+    // console.log(ts);
     date = new Date(ts.seconds * 1000);
+    // console.log(date);
     str = ""
     str += date.getMonth() + 1;
     mins = date.getMinutes();
     mins = ("0" + mins).slice(-2);
-    str += "/" + (date.getDay() + 1) + "/" + (date.getYear() - 100) + " " + date.getHours() + ":" + mins;
+    str += "/" + (date.getDate()) + "/" + (date.getYear() - 100) + " " + date.getHours() + ":" + mins;
+    // console.log(str);
     return str;
 }
 
@@ -421,10 +422,10 @@ function exportWeek(e) {
     const endTime = getMostRecentSundayMidnight();
     const startTime = new Date();
     startTime.setDate(endTime.getDate() - 7);
-    startTime.setHours(0,0,0,0);
+    startTime.setHours(0, 0, 0, 0);
     const endTimePretty = new Date();
     endTimePretty.setDate(endTime.getDate() - 1);
-    endTimePretty.setHours(0,0,0,0);
+    endTimePretty.setHours(0, 0, 0, 0);
 
     console.log(startTime);
     console.log(endTime);

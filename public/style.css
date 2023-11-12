@@ -156,15 +156,15 @@ dialog datalist {
 
 /* Style the buttons within the dialog */
 dialog button {
-    background-color: #333;
+    /* background-color: #333; */
     /* Dark background color for buttons in the dialog */
-    color: #fff;
+    /* color: #fff; */
     /* White text color for buttons in the dialog */
-    padding: 10px 20px;
-    border: none;
+    /* padding: 10px 20px; */
+    /* border: none; */
     margin-top: 20px !important;
-    cursor: pointer;
-    margin: 5px;
+    /* cursor: pointer; */
+    /* margin: 5px; */
 }
 
 /* Style the dialog background overlay */
