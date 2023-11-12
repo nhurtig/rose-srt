@@ -430,7 +430,7 @@ function exportWeek(e) {
     console.log(startTime);
     console.log(endTime);
 
-    visits.push(["Student, Course, Professor, Problem Description, Time In, Time Out", "Total Time"]);
+    visits.push(["Quarter", "Student", "Course", "Professor", "Problem Description", "Time In", "Time Out", "Total Time"]);
     visitCollection.where('owner', '==', globalUser.uid).where('timeIn', '>', startTime).where('timeIn', '<', endTime).get().then((qS) => {
         qS.forEach((doc) => {
             data = doc.data();
@@ -460,7 +460,7 @@ function exportWeek(e) {
 function exportAll(e) {
     const quarterNames = new Map();
     const visits = [];
-    visits.push(["Quarter, Student, Course, Professor, Problem Description, Time In, Time Out", "Total Time"]);
+    visits.push(["Quarter", "Student", "Course", "Professor", "Problem Description", "Time In", "Time Out", "Total Time"]);
     quarterCollection.where('owner', '==', globalUser.uid).get().then((qS) => {
         qS.forEach((doc) => {
             data = doc.data();
