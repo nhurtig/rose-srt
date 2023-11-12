@@ -175,7 +175,7 @@ function makeEditable(row, id) {
         row.style.display = 'table-row';
         visitCollection.doc(id).update({
             isDone: !!document.getElementById('timeOut' + id).value,
-            name: document.getElementById('name' + id).value,
+            student: document.getElementById('name' + id).value,
             prof: document.getElementById('prof' + id).value,
             className: document.getElementById('className' + id).value,
             timeOut: HTMLdateToFS(document.getElementById('timeOut' + id).value),
