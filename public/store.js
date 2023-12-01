@@ -430,7 +430,7 @@ function exportWeek(e) {
     console.log(startTime);
     console.log(endTime);
 
-    visits.push(["Quarter", "Student", "Course", "Professor", "Problem Description", "Time In", "Time Out", "Total Time"]);
+    visits.push(["Quarter", "Student", "Course", "Professor", "Problem Description", "Time In", "Time Out", "Total Time (min)"]);
     visitCollection.where('owner', '==', globalUser.uid).where('timeIn', '>', startTime).where('timeIn', '<', endTime).get().then((qS) => {
         qS.forEach((doc) => {
             data = doc.data();
@@ -450,7 +450,7 @@ function exportWeek(e) {
                 data.reason,
                 convertTimestampToHumanReadable(data.timeIn),
                 convertTimestampToHumanReadable(timeOut),
-                secondsToHHMM(totalTime)
+                totalTime/60
             ]);
         });
         download2Darray(`visits_${formatDateToMMDD(startTime)}-${formatDateToMMDD(endTimePretty)}`, visits);
@@ -460,7 +460,7 @@ function exportWeek(e) {
 function exportAll(e) {
     const quarterNames = new Map();
     const visits = [];
-    visits.push(["Quarter", "Student", "Course", "Professor", "Problem Description", "Time In", "Time Out", "Total Time"]);
+    visits.push(["Quarter", "Student", "Course", "Professor", "Problem Description", "Time In", "Time Out", "Total Time (min)"]);
     quarterCollection.where('owner', '==', globalUser.uid).get().then((qS) => {
         qS.forEach((doc) => {
             data = doc.data();
@@ -492,7 +492,7 @@ function exportAll(e) {
                     data.reason,
                     convertTimestampToHumanReadable(data.timeIn),
                     convertTimestampToHumanReadable(timeOut),
-                    secondsToHHMM(totalTime)
+                    totalTime/60
                 ]);
             });
             download2Darray("all_visits", visits);
