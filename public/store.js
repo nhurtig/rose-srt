@@ -430,7 +430,7 @@ function exportWeek(e) {
     console.log(startTime);
     console.log(endTime);
 
-    visits.push(["Quarter", "Student", "Course", "Professor", "Problem Description", "Time In", "Time Out", "Total Time (min)"]);
+    visits.push(["Student", "Course", "Professor", "Problem Description", "Time In", "Time Out", "Total Time (min)"]);
     visitCollection.where('owner', '==', globalUser.uid).where('timeIn', '>', startTime).where('timeIn', '<', endTime).get().then((qS) => {
         qS.forEach((doc) => {
             data = doc.data();
