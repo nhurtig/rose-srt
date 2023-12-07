@@ -455,7 +455,7 @@ function exportWeek(e) {
                 data.reason,
                 convertTimestampToHumanReadable(data.timeIn),
                 convertTimestampToHumanReadable(timeOut),
-                totalTime/60
+                Math.round(totalTime/60)
             ]);
         });
         download2Darray(`visits_${formatDateToMMDD(startTime)}-${formatDateToMMDD(endTimePretty)}`, visits);
@@ -498,7 +498,7 @@ function exportAll(e) {
                     data.reason,
                     convertTimestampToHumanReadable(data.timeIn),
                     convertTimestampToHumanReadable(timeOut),
-                    totalTime/60
+                    Math.round(totalTime/60)
                 ]);
             });
             download2Darray("all_visits", visits);
