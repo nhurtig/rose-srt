@@ -36,6 +36,7 @@ function populatePage() {
     document.getElementById('quarterLabel').textContent = "Current quarter: " + currentQuarter.data().name;
     visits.innerHTML = `      <tr>
         <th>Name</th>
+        <th>ID</th>
         <th>Course</th>
         <th>Professor</th>
         <th>Reason</th>
@@ -134,13 +135,13 @@ function makeEditable(row, id) {
     const cells = row.getElementsByTagName('td');
     const newRow = document.createElement('tr');
 
-    const names = ['name', 'className', 'prof', 'reason', 'timeIn', 'timeOut']
-    for (let i = 0; i < 6; i++) {
+    const names = ['name', 'id', 'className', 'prof', 'reason', 'timeIn', 'timeOut']
+    for (let i = 0; i < names.length; i++) {
         const cell = cells[i];
         const currentValue = cell.textContent;
         const input = document.createElement('input');
         input.id = names[i] + id;
-        if (i < 4) {
+        if (i < 5) {
             input.type = 'text';
             input.value = currentValue;
         } else {
@@ -176,6 +177,7 @@ function makeEditable(row, id) {
         visitCollection.doc(id).update({
             isDone: !!document.getElementById('timeOut' + id).value,
             student: document.getElementById('name' + id).value,
+            id: document.getElementById('id' + id).value,
             prof: document.getElementById('prof' + id).value,
             className: document.getElementById('className' + id).value,
             timeOut: HTMLdateToFS(document.getElementById('timeOut' + id).value),
@@ -226,6 +228,7 @@ function deleteVisit(id) {
 function fillRow(row, data, doc) {
     row.innerHTML = "";
     row.innerHTML += makeData(data.student);
+    row.innerHTML += makeData(data.id);
     row.innerHTML += makeData(data.className);
     row.innerHTML += makeData(data.prof);
     row.innerHTML += makeData(data.reason);
@@ -263,10 +266,10 @@ function submitHandler(e) {
     e.preventDefault();
     modalForm.reset();
     const studentName = addStudentForm.name.value;
-    modalForm.name.value = studentName;
+    modalForm.modalName.value = studentName;
     modalInfo.innerHTML = '<button type="button" style="visibility: hidden;">autofill</button>';
     addVisitModal.showModal();
-    modalForm.class.focus();
+    modalForm.modalClass.focus();
     addStudentForm.reset();
 
     // get student's info
@@ -276,6 +279,7 @@ function submitHandler(e) {
             qS.forEach((doc) => {
                 data = doc.data();
                 courses.add(data.className + ';' + data.prof);
+                modalForm.modalID.value = data.id;
             });
             modalInfo.innerHTML = '';
             for (const courseStr of courses.keys()) {
@@ -290,10 +294,10 @@ function courseHandler(e) {
     e.preventDefault();
     modalForm.reset();
     const className = addCourseForm.name.value;
-    modalForm.class.value = className;
+    modalForm.modalClass.value = className;
     modalInfo.innerHTML = '<button type="button" style="visibility: hidden;">autofill</button>';
     addVisitModal.showModal();
-    modalForm.name.focus();
+    modalForm.modalName.focus();
     addCourseForm.reset();
 
     // get course's info
@@ -302,27 +306,28 @@ function courseHandler(e) {
         .where('className', '==', className).get().then((qS) => {
             qS.forEach((doc) => {
                 data = doc.data();
-                students.add(data.student + ';' + data.prof);
+                students.add(data.student + ';' + data.prof + ';' + data.id);
             });
             modalInfo.innerHTML = '';
             for (const courseStr of students.keys()) {
                 course = courseStr.split(';');
-                modalInfo.innerHTML += `<button type="button" onclick="modalStudent('${course[0]}', '${course[1]}')">${course[0]}/${course[1]}</button>`
+                modalInfo.innerHTML += `<button type="button" onclick="modalStudent('${course[0]}', '${course[1]}', '${course[2]}')">${course[0]}/${course[1]}</button>`
             }
             fixModalButtons();
         });
 }
 
 function modalCourse(cname, prof) {
-    modalForm.reason.focus();
-    modalForm.class.value = cname;
-    modalForm.prof.value = prof;
+    modalForm.modalReason.focus();
+    modalForm.modalClass.value = cname;
+    modalForm.modalProf.value = prof;
 }
 
-function modalStudent(student, prof) {
-    modalForm.reason.focus();
-    modalForm.name.value = student;
-    modalForm.prof.value = prof;
+function modalStudent(student, prof, id) {
+    modalForm.modalReason.focus();
+    modalForm.modalID.value = id;
+    modalForm.modalName.value = student;
+    modalForm.modalProf.value = prof;
 }
 
 function fixModalButtons() {
@@ -341,15 +346,14 @@ function fixModalButtons() {
 modalForm.addEventListener('submit', addVisitFormSubmit);
 
 function addVisitFormSubmit(e) {
-    console.log("HI");
     visitCollection.add({
         isDone: false, prof: modalForm.modalProf.value,
         className: modalForm.modalClass.value, reason: modalForm.modalReason.value,
         student: modalForm.modalName.value, timeIn: firebase.firestore.FieldValue.serverTimestamp(),
+        id: modalForm.modalID.value,
         quarter: quarterCollection.doc(currentQuarter.id),
         owner: globalUser.uid
     }).then((doc) => {
-        console.log("ADDED");
         doc.get().then((doc) => {
             addVisit(doc, true);
         });
@@ -430,7 +434,7 @@ function exportWeek(e) {
     console.log(startTime);
     console.log(endTime);
 
-    visits.push(["Student", "Course", "Professor", "Problem Description", "Time In", "Time Out", "Total Time (min)"]);
+    visits.push(["Student", "ID", "Course", "Professor", "Problem Description", "Time In", "Time Out", "Total Time (min)"]);
     visitCollection.where('owner', '==', globalUser.uid).where('timeIn', '>', startTime).where('timeIn', '<', endTime).get().then((qS) => {
         qS.forEach((doc) => {
             data = doc.data();
@@ -445,6 +449,7 @@ function exportWeek(e) {
             }
             visits.push([
                 data.student,
+                data.id,
                 data.className,
                 data.prof,
                 data.reason,
@@ -460,7 +465,7 @@ function exportWeek(e) {
 function exportAll(e) {
     const quarterNames = new Map();
     const visits = [];
-    visits.push(["Quarter", "Student", "Course", "Professor", "Problem Description", "Time In", "Time Out", "Total Time (min)"]);
+    visits.push(["Quarter", "Student", "ID", "Course", "Professor", "Problem Description", "Time In", "Time Out", "Total Time (min)"]);
     quarterCollection.where('owner', '==', globalUser.uid).get().then((qS) => {
         qS.forEach((doc) => {
             data = doc.data();
@@ -487,6 +492,7 @@ function exportAll(e) {
                 visits.push([
                     quarterName,
                     data.student,
+                    data.id,
                     data.className,
                     data.prof,
                     data.reason,

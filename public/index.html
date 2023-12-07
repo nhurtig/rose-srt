@@ -30,6 +30,7 @@
   <dialog id="addVisit">
     <form id="modalForm" method="dialog">
       <div><input type="text" required name="name" id="modalName" autocomplete="off" list="students" placeholder="name">
+        <input type="text" required name="name" id="modalID" autocomplete="off" placeholder="id">
         <input type="text" required name="class" id="modalClass" autocomplete="off" list="courses"
           placeholder="course name">
         <input type="text" required name="prof" id="modalProf" autocomplete="off" placeholder="prof">
@@ -90,6 +91,7 @@
       <tbody id="visits">
         <tr>
           <th>Name</th>
+          <th>ID</th>
           <th>Course</th>
           <th>Professor</th>
           <th>Reason</th>
