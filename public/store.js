@@ -151,6 +151,7 @@ function makeEditable(row, id) {
                 date = dateTime[0];
                 dateSplit = date.split('/');
                 month = dateSplit[0];
+                month = ("0" + month).slice(-2);
                 day = dateSplit[1];
                 day = ("0" + day).slice(-2);
                 year = parseInt(dateSplit[2]) + 2000;
