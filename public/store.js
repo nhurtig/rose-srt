@@ -406,7 +406,7 @@ function confirm(f, prompt) {
 function getMostRecentWednesdayMidnight() {
     const currentDate = new Date();
     const currentDayOfWeek = currentDate.getDay();
-    const daysToSubtract = (currentDayOfWeek) % 7 + 4; // Calculate days to subtract to reach the most recent Saturday
+    const daysToSubtract = (currentDayOfWeek+3) % 7; // Calculate days to subtract to reach the most recent Saturday
 
     // Subtract days to get the timestamp for the most recent Saturday midnight
     currentDate.setDate(currentDate.getDate() - daysToSubtract);
