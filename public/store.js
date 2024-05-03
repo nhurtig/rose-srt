@@ -403,10 +403,10 @@ function confirm(f, prompt) {
     confirmModal.showModal();
 }
 
-function getMostRecentSundayMidnight() {
+function getMostRecentWednesdayMidnight() {
     const currentDate = new Date();
     const currentDayOfWeek = currentDate.getDay();
-    const daysToSubtract = (currentDayOfWeek) % 7; // Calculate days to subtract to reach the most recent Saturday
+    const daysToSubtract = (currentDayOfWeek) % 7 + 4; // Calculate days to subtract to reach the most recent Saturday
 
     // Subtract days to get the timestamp for the most recent Saturday midnight
     currentDate.setDate(currentDate.getDate() - daysToSubtract);
@@ -424,7 +424,7 @@ function formatDateToMMDD(date) {
 
 function exportWeek(e) {
     const visits = [];
-    const endTime = getMostRecentSundayMidnight();
+    const endTime = getMostRecentWednesdayMidnight();
     const startTime = new Date();
     startTime.setDate(endTime.getDate() - 7);
     startTime.setHours(0, 0, 0, 0);
